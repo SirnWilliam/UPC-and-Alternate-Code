@@ -1,0 +1,46 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="PRAGMA" content="No_Cache" />
+    <link rel="stylesheet" href="../../Images/pro_form.css" type="text/css" />
+    <link rel="stylesheet" href="../../Images/pro_rpt.css" type="text/css" />
+<script type="text/javascript">
+function SmsLoad() 
+{
+  document.getElementById("myFocus").focus();
+  var val = document.getElementById("myFocus").value;
+  document.getElementById("myFocus").value = '';
+  document.getElementById("myFocus").value = val;
+  
+}
+function GoURL()
+{
+	document.location='http:/scripts/trs.exe?htt=Script\\sku_itm_rpt_test.rpt&amp;CODE =' + document.all("itemcode").value + '&amp;cn=@CNC&amp;tn=@TER';	
+}
+</script>
+</head>
+<body style="overflow:hidden" onmouseover="SmsLoad()" onload="SmsLoad()">
+<table class="HdrTab">
+      <tbody>
+        <tr>
+          <td class="HdrCel">Enter UPC or Alternate Code</td>
+        </tr>
+		<tr>
+		  <td class="EntVal"><input class="EntValTxt" type="text" onfocus="this.select()" onkeydown="if(event.keyCode==13)GoURL()" style="WIDTH: 110px" id="myFocus" name="itemcode" maxlength="13" value="@wizget(CODE)"/></td>
+		  <td class="HdrBtnCel"><input class="HdrBtnNew" onclick="GoURL()" type="button" value="Launch" name="BtnSubmit" /></td>
+		</tr>
+      </tbody>
+    </table>
+	@dbHot(BROWSER,
+	SELECT OBJ.F01, NULL F154, OBJ.F155, OBJ.F29
+	FROM OBJ_TAB OBJ
+	WHERE OBJ.F01 = '@FMT(UPC,@WIZGET(CODE))'
+	UNION
+	SELECT OBJ.F01, ALT.F154, OBJ.F155, OBJ.F29
+	FROM ALT_TAB ALT JOIN OBJ_TAB OBJ ON ALT.F01 = OBJ.F01
+	WHERE (ALT.F154 = '@wizget(CODE)' OR ALT.F154 = '@FMT(UPC,@WIZGET(CODE))')
+	);
+</body>
+</html>
+

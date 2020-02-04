@@ -1,0 +1,14 @@
+/* Item Test */
+
+@WIZRPL(FORM=Test);
+@WIZRPL(TITLE=Item Test);
+@WIZSET(TOP=2);
+@WIZSET(LEFT=1022);
+@WIZSET(HEIGHT=200);
+@WIZSET(WIDTH=300);
+@WIZSET(PPI=96);
+@WIZSET(MODE=2);
+@WIZRPL(STATE=FOCUS);
+
+@EXEC(htt=Script\sku_itm_rpt_test.rpt);
+
