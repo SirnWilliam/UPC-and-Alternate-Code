@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html class="Child" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <link rel="stylesheet" href="../../Images/pro_form.css" type="text/css" />
+    <link rel="stylesheet" href="../../Images/pro_info.css" type="text/css" />
+<script type="text/javascript">
+@IF(@WIZGET(TJOB)=OWNER)
+ @MACSIL(UPDATE OBJ_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE POS_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE PRICE_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE COST_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE LOC_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE ALT_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE KIT_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE ECL_TAB SET F1964='@STORE' WHERE F164 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE CLT_ITM_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE DSD_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+ @MACSIL(UPDATE SCL_TAB SET F1964='@STORE' WHERE F01 IN (@DBHOT(SUBQUERY)));
+@ENDIF
+
+@IF(@WIZGET(TJOB)=VERIFIED)
+ @MACSIL(UPDATE PRICE_TAB SET F41=0 WHERE F01 IN (@DBHOT(SUBQUERY)));
+@ENDIF
+
+function SmsLoad()
+{
+@IF(@wizget(INITINV)=1)
+InitInv('@dbSelect(SELECT COUNT(*) FROM OBJ_TAB WHERE F01 IN (@dbHot(SUBQUERY)))')
+@ENDIF
+
+@IF(@wizget(INITVERIFIED)=1)
+InitVerified('@dbSelect(SELECT COUNT(*) FROM OBJ_TAB WHERE F01 IN (@dbHot(SUBQUERY)))')
+@ENDIF
+
+@IF(@wizget(ERASEINV)=1)
+EraseInv('@dbSelect(SELECT COUNT(*) FROM OBJ_TAB WHERE F01 IN (@dbHot(SUBQUERY)))')
+@ENDIF
+
+@IF(@wizget(TAKEOWNER)=1)
+TakeOwner('@dbSelect(SELECT COUNT(*) FROM OBJ_TAB WHERE F01 IN (@dbHot(SUBQUERY)))')
+@ENDIF
+}
+
+function GoUrl(Url) 
+{document.location="Http:/Scripts/Trs.exe?"+Url}
+
+function TakeOwner(sInvValue)
+{
+ if(confirm('Take ownership for ' + sInvValue + ' item(s) in the browser?'))
+  GoUrl('htt=Script\\sku_itm_utl_deploy&TJOB=OWNER');
+}
+
+function InitVerified(sInvValue)
+{
+ if(confirm('Remove PDA verified flag for ' + sInvValue + ' item(s) in the browser?'))
+  GoUrl('htt=Script\\sku_itm_utl_deploy&TJOB=VERIFIED');
+}
+
+function InitInv(sInvValue) 
+{
+ @IF(@DBHOT(INI,SYSTEM,SMS,UPDATEINVENTORY)=0)
+  alert('Your system is configured for no inventory!');
+  return false;
+ @ENDIF
+
+ if(confirm('This will initialize inventory on @DSW-007. Any transaction dated before this will not affect the inventory. If your goal is to adjust inventory to zero, you should use SMS inventory module. Are you sure you still want to initialize?'))
+   {
+     var reponse=document.comdialog.get_prompt('Type \'YES\' here to accept','Initialize ' + sInvValue + ' item(s) in the browser?');
+     if (document.comdialog.okcancel() == 0 || (document.comdialog.okcancel() ==1 && reponse.toLowerCase()!='yes'))
+       return false 
+     else
+       document.location="Http:/Scripts/Trs.exe?FCT=12810";
+   }
+ else
+   return false;
+}
+
+function EraseInv(sInvValue) 
+{
+ @IF(@DBHOT(INI,SYSTEM,SMS,UPDATEINVENTORY)=2)
+  alert('Your system is configured for inventory on every item! Use the SMS inventory module to adjust inventory to zero.');
+  return false;
+ @ENDIF
+
+ if(confirm('Erase perpetual inventory for all ' + sInvValue + ' items in the browser?'))
+  {
+   if(confirm('This will erase all perpetual inventory information, are you sure?'))
+    {
+     document.location="Http:/Scripts/Trs.exe?FCT=12815"
+    }
+  }
+}
+
+</script>
+
+    <title></title>
+  </head>
+
+  <body class="InfoHdr" onload="SmsLoad()">
+    <object id="comdialog" style="VISIBILITY: hidden; POSITION: absolute; TOP: -200px" height="10" width="100" classid="clsid:327DC737-2BAD-48A3-9B4E-B42D5378C78A">
+    </object> 
+    <div id="gen_sets" style="VISIBILITY: hidden; POSITION: absolute; TOP: -200px; BACKGROUND-COLOR: white">
+    </div>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 120px" type="button" value="Apply change" name="FCT" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 120px" onclick="GoUrl('SQL=Script\\sku_itm_qry_changes')" type="button" value="Display changes" name="FCT" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 120px" onclick="GoUrl('sql=Script\\sku_itm_bug_1summary&amp;deploy_change=1')" type="button" value="Deploy changes" name="FCT" /></td>
+        </tr>
+
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 120px" onclick="GoUrl('FCT=13050')" type="button" value="Instant label" name="FCT" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel">Windows</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11160')" type="button" value="Price" name="FCT" /></td>
+
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11170')" type="button" value="Cost" name="FCT" /></td>
+        </tr>
+
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11320')" type="button" value="FPrice" name="FCT" /></td>
+
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11340')" type="button" value="FCost" name="FCT" /></td>
+        </tr>
+
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11330')" type="button" value="Sale" name="FCT" /></td>
+
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11335')" type="button" value="TPR" name="FCT" /></td>
+        </tr>
+
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11175')" type="button" value="Coupon" name="FCT" /></td>
+
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 60px" onclick="GoUrl('FCT=11140')" type="button" value="Shelf" name="FCT" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel">Batches</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 120px" onclick="GoUrl('FCT=11396')" type="button" value="Execute" name="FCT" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel">Actions based on browser</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="GoUrl('sql=Script\\cub_itm_cost_sum&amp;@PROFILE/Cube/cub_itm_cost_sum/F1034=3&amp;@PROFILE/Cube/cub_itm_cost_sum/F04=FromBrowser&amp;Form=cub_itm_cost_sum&amp;TITLE=@FMT(2URL,Item margin summary)')" type="button" value="Item movement cube" name="Add" /></td>
+        </tr>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="GoUrl('htt=sku_hook&amp;Info=htt=RPT_BRW&amp;Form=RptBrw&amp;Title=BrowserReport&amp;Width=800&amp;Height=400')" type="button" value="Paper report" name="Add" /></td>
+        </tr>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onclick="GoUrl('rpt=lbl_next_price_evt&amp;Form=Label&amp;Title=Wizard&amp;ITEM=2')" type="button" value="Labels" name="FCT" /></td>
+        </tr>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn @FMT(CMP,@DBHOT(INI,SYSTEM.INI,SKU,OwnerMode)=2,Hide,)" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="document.location='Http:/Scripts/Trs.exe?htt=Script\\sku_itm_utl_deploy&amp;TAKEOWNER=1'" type="button" value="Take ownership" name="Add" /></td>
+        </tr>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="document.location='Http:/Scripts/Trs.exe?sqm=exe_deploy_Item'" type="button" value="Deploy item" name="Add" /></td>
+        </tr>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="document.location='Http:/Scripts/Trs.exe?htt=Script\\sku_itm_utl_deploy&amp;INITVERIFIED=1'" type="button" value="Remove PDA verified flag" name="Add" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel">Inventory Tools</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="document.location='Http:/Scripts/Trs.exe?htt=Script\\sku_itm_utl_deploy&amp;INITINV=1'" type="button" value="Initialize perpetual inventory" name="Add" /></td>
+        </tr>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onkeydown="" onblur="" onfocus="" onclick="document.location='Http:/Scripts/Trs.exe?htt=Script\\sku_itm_utl_deploy&amp;ERASEINV=1'" type="button" value="Erase perpetual inventory" name="Del" /></td>
+        </tr>
+      </tbody>
+    </table>
+	
+	<table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel">Test items by Shammam</td>
+        </tr>
+      </tbody>
+    </table>
+	
+	<table class="FrmTab">
+      <tbody>
+        <tr>
+          <td class="FrmCel"><input class="EntBtn" style="WIDTH: 160px" onclick="GoUrl('SQL=Script\\sku_itm_rpt_test')" type="button" value="Test an Item here" name="FCT" /></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
+
